@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "114795663261",
+    "project_id": "smilechat-b5b21",
+    "storage_bucket": "smilechat-b5b21.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114795663261:android:e85969f4df9e057812a974",
+        "android_client_info": {
+          "package_name": "com.daniort.smile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "114795663261-5hmkgo26ntvpek4ic886f1uflrbk8u5q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7ThOpdyKYpiz9i-8LFr1FZ0KLg7VoQZ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "114795663261-5hmkgo26ntvpek4ic886f1uflrbk8u5q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
