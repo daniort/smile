@@ -27,14 +27,14 @@ class _SplashPageState extends State<SplashPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-            //   bott > 0
-            //       ? SizedBox()
-            //       :
-                   Expanded(
-                      child: Container(
-                          width: size.width * 0.7,
-                          child: Image.asset('assets/images/logo1.png')),
-                    ),
+              //   bott > 0
+              //       ? SizedBox()
+              //       :
+              Expanded(
+                child: Container(
+                    width: size.width * 0.7,
+                    child: Image.asset('assets/images/logo1.png')),
+              ),
               this.mostrarFormulario == false
                   ? Dismissible(
                       key: Key('login'),
@@ -153,7 +153,7 @@ class _SplashPageState extends State<SplashPage> {
                                   if (_formKey.currentState.validate())
                                     Provider.of<AppState>(context,
                                             listen: false)
-                                        .log_in(_passController.text,
+                                        .log_in(_emailController.text,
                                             _passController.text);
                                 },
                                 splashColor: Colors.limeAccent,
@@ -180,7 +180,19 @@ class _SplashPageState extends State<SplashPage> {
                                             fontSize: 15)),
                                   ),
                                 ),
-                              )
+                              ),
+                              InkWell(
+                                onTap: (){
+                                   if (_formKey.currentState.validate())
+                                   Provider.of<AppState>(context,
+                                            listen: false)
+                                        .registro(
+                                            _emailController.text,
+                                          _passController.text,
+                                            );
+                                },
+                                child: Text('Registrate aqui'),
+                              ),
                             ],
                           ),
                         ),
