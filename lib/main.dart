@@ -15,6 +15,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Smile Chat',
         initialRoute: '/',
+        theme: ThemeData(primarySwatch: Colors.lime,
+        primaryColor: Color(0xFFA0D523),
+        ),
         routes: {
           "/": (BuildContext context) {
             final _state = Provider.of<AppState>(context);
