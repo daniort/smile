@@ -13,12 +13,15 @@ class _SplashPageState extends State<SplashPage> {
   TextEditingController _passController = new TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  final _scaKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    // double bott = MediaQuery.of(context).viewInsets.bottom;
+    double bott = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
+        key: _scaKey,
         backgroundColor: Color(0xFFA0D523),
         body: Container(
           // width: EdgeInsets.symmetric(horizontal: 20),
@@ -27,14 +30,13 @@ class _SplashPageState extends State<SplashPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              //   bott > 0
-              //       ? SizedBox()
-              //       :
-              Expanded(
-                child: Container(
-                    width: size.width * 0.7,
-                    child: Image.asset('assets/images/logo1.png')),
-              ),
+              bott > 0
+                  ? SizedBox()
+                  : Expanded(
+                      child: Container(
+                          width: size.width * 0.7,
+                          child: Image.asset('assets/images/logo1.png')),
+                    ),
               this.mostrarFormulario == false
                   ? Dismissible(
                       key: Key('login'),
@@ -149,12 +151,24 @@ class _SplashPageState extends State<SplashPage> {
                                 },
                               ),
                               InkWell(
-                                onTap: () {
-                                  if (_formKey.currentState.validate())
-                                    Provider.of<AppState>(context,
-                                            listen: false)
-                                        .log_in(_emailController.text,
-                                            _passController.text);
+                                onTap: () async {
+                                  if (_formKey.currentState.validate()) {
+                                    Map<String, dynamic> _res =
+                                        await Provider.of<AppState>(context,
+                                                listen: false)
+                                            .log_in(_emailController.text,
+                                                _passController.text);
+                                    print(_res);
+                                    if (_res['res'])
+                                      Navigator.pop(context);
+                                    else
+                                      _scaKey.currentState
+                                          .showSnackBar(SnackBar(
+                                        content: Text(_res['mensaje'].toString()),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 7),
+                                      ));
+                                  }
                                 },
                                 splashColor: Colors.limeAccent,
                                 child: Container(
@@ -182,16 +196,12 @@ class _SplashPageState extends State<SplashPage> {
                                 ),
                               ),
                               InkWell(
-                                onTap: (){
-                                   if (_formKey.currentState.validate())
-                                   Provider.of<AppState>(context,
-                                            listen: false)
-                                        .registro(
-                                            _emailController.text,
-                                          _passController.text,
-                                            );
-                                },
-                                child: Text('Registrate aqui'),
+                                onTap: () =>
+                                    Navigator.pushNamed(context, 'registro'),
+                                child: Text(
+                                  'Registrate aqui',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ],
                           ),

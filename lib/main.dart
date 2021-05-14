@@ -3,12 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smile/pages/chat.dart';
 import 'package:smile/pages/home.dart';
+import 'package:smile/pages/registro.dart';
 import 'package:smile/pages/splash.dart';
 import 'package:smile/services/appstate.dart';
 import 'package:provider/provider.dart';
-
-// void main() =>runApp(MyApp());
-
 void main()async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -19,7 +17,6 @@ void main()async{
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Firebase.initializeApp();
     return ChangeNotifierProvider(
       create: (BuildContext context) => AppState(),
       child: MaterialApp(
@@ -37,6 +34,7 @@ class MyApp extends StatelessWidget {
               return SplashPage();
           },
           'chat': (_) => ChatPage(),
+          'registro': (_) => RegistroPage(),
         },
       ),
     );

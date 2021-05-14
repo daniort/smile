@@ -4,26 +4,31 @@ import 'package:flutter/material.dart';
 
 class AppState with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  FirebaseDatabase realDB = new FirebaseDatabase();
+  DatabaseReference _db = new FirebaseDatabase().reference();
   User _user;
 
   bool _login = false;
   get login => this._login;
 
-  void log_in(String email, String pass) async {
-    print(email);
+  Future<Map<String, dynamic>> log_in(String email, String pass) async {
     try {
-      this._user = (await _auth.signInWithEmailAndPassword(email: email, password: pass)).user;
-      print("===========LOGINNNN=======");
-      print(this._user.email);
-      if (this._user != null)
+      UserCredential _result =
+          await _auth.signInWithEmailAndPassword(email: email, password: pass);
+      this._user = _result.user;
+      if (this._user != null) {
         this._login = true;
-      else
-        this._login = false;
-      notifyListeners();
+        notifyListeners();
+        return {'res': false, 'mensaje': 'Todo good :D.'};
+      } else {
+        return {'res': false, 'mensaje': 'Algo salió mal.'};
+      }
     } catch (e) {
-      print("====>>>>>>>>>>>>>>>>><<<");
-      print(e);
+      // print(e.hashCode);
+      // print(e.runtimeType);
+      // print(e);
+      FirebaseAuthException error = e;
+      // print(error.code);
+      return {'res': false, 'mensaje': error.message};
     }
   }
 
@@ -32,37 +37,36 @@ class AppState with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> registro(String email, String pass) async {
-    print(email);
-      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password:pass);
-      // result.user.sendEmailVerification();
-      print(result.user);
-      
-
-
-    // ENVIAR DATOS A FIREBASE PARA REGISTARR
-    notifyListeners();
+  Future<Map<String, dynamic>> registro(
+      String nombre, String email, String pass) async {
+    try {
+      print(email);
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+          email: email, password: pass);
+      result.user.updateProfile(displayName: nombre);
+      if (result.user != null) {
+        _db.child('users').set({
+          'user': nombre,
+          'email': email,
+          'idAuth': result.user.uid,
+        });
+        print(result.user);
+        return {'res': true, 'mensaje': 'Todo bien, todo correcto'};
+      } else {
+        return {'res': false, 'mensaje': 'Algo salió mal.'};
+      }
+    } catch (e) {
+     FirebaseAuthException error = e;
+      // print(error.code);
+      return {'res': false, 'mensaje': error.message};      
+    }
   }
 }
 
-// Future<void> _signInWithEmailAndPassword() async {
-//   try {
-//     final User user = (await _auth.signInWithEmailAndPassword(
-//       email: _emailController.text,
-//       password: _passwordController.text,
-//     ))
-//         .user;
 
-//     Scaffold.of(context).showSnackBar(
-//       SnackBar(
-//         content: Text('${user.email} signed in'),
-//       ),
-//     );
-//   } catch (e) {
-//     Scaffold.of(context).showSnackBar(
-//       const SnackBar(
-//         content: Text('Failed to sign in with Email & Password'),
-//       ),
-//     );
-//   }
-// }
+
+
+// 185768934
+// I/flutter (13529): {res: false, mensaje: [firebase_auth/wrong-password] The password is invalid or the user does not have a password.}
+
+
