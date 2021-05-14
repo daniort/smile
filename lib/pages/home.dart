@@ -11,7 +11,6 @@ class HomePage extends StatelessWidget {
       drawer: Drawer(
         child: ListView(
           children: [
-            
             ListTile(
               title: Text('Cerrar sesión'),
               leading: Icon(Icons.exit_to_app),
@@ -21,19 +20,46 @@ class HomePage extends StatelessWidget {
         ),
       ),
       appBar: AppBar(backgroundColor: Color(0xFFA0D523)),
-      body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        children: [
-          Container(
-            margin: EdgeInsets.only(bottom: 10),
-            child: ListTile(
-              tileColor: Colors.grey[200],
-              title: Text('Sarah Merino'),
-              leading: CircleAvatar(backgroundColor: Colors.limeAccent),
-              onTap: () => Navigator.pushNamed(context, 'chat'),
-            ),
-          ),
-        ],
+      body: StreamBuilder(
+        stream: _state.getAllUser(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          print(snapshot.data.snapshot.value);
+          Map<dynamic, dynamic> _users = snapshot.data.snapshot.value;
+          List us = new List();
+          _users.forEach((index, dato) {
+            print(index);
+            print(dato);
+            us.add({"key": index, ...dato});
+          });
+          return ListView(
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            children: [
+              for (var item in us)
+                if (item['idAuth'] != _state.idUser)
+                  Container(
+                    margin: EdgeInsets.only(bottom: 10),
+                    child: ListTile(
+                      tileColor: Colors.grey[200],
+                      title: Text(item['name']),
+                      subtitle: Text('Hola, Buenos días!'),
+                      leading: CircleAvatar(backgroundColor: Colors.limeAccent),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text('2:00 p.m.'),
+                          Icon(Icons.circle, color: Colors.lime)
+                        ],
+                      ),
+                      onTap: () => Navigator.pushNamed(context, 'chat',
+                          arguments: {
+                            'id': item['idAuth'],
+                            'nombre': item['name']
+                          }),
+                    ),
+                  ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -57,8 +83,6 @@ class HomePage extends StatelessWidget {
 //               ),
 //             ),
 //           ),
-
-
 
 // Container(
 //               color: Colors.lime,

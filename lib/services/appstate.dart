@@ -6,15 +6,18 @@ class AppState with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference _db = new FirebaseDatabase().reference();
   User _user;
+  String _idUser = '';
 
   bool _login = false;
   get login => this._login;
+  get idUser => this._idUser;
 
   Future<Map<String, dynamic>> log_in(String email, String pass) async {
     try {
       UserCredential _result =
           await _auth.signInWithEmailAndPassword(email: email, password: pass);
       this._user = _result.user;
+      this._idUser = this._user.uid;
       if (this._user != null) {
         this._login = true;
         notifyListeners();
@@ -27,7 +30,7 @@ class AppState with ChangeNotifier {
       // print(e.runtimeType);
       // print(e);
       FirebaseAuthException error = e;
-      // print(error.code);
+      print(error.code);
       return {'res': false, 'mensaje': error.message};
     }
   }
@@ -45,8 +48,8 @@ class AppState with ChangeNotifier {
           email: email, password: pass);
       result.user.updateProfile(displayName: nombre);
       if (result.user != null) {
-        _db.child('users').set({
-          'user': nombre,
+        _db.child('users').push().set({
+          'name': nombre,
           'email': email,
           'idAuth': result.user.uid,
         });
@@ -56,17 +59,42 @@ class AppState with ChangeNotifier {
         return {'res': false, 'mensaje': 'Algo salió mal.'};
       }
     } catch (e) {
-     FirebaseAuthException error = e;
-      // print(error.code);
-      return {'res': false, 'mensaje': error.message};      
+      FirebaseAuthException error = e;
+      print(error.code);
+      return {'res': false, 'mensaje': error.message};
     }
   }
+
+  Future<void> nuevoMensaje(String mensaje, String idDestinatario) async {
+    try {
+      await _db.child('mensajes').push().set({
+        'mensaje': mensaje,
+        'fecha': DateTime.now().toString(),
+        'de': this._idUser,
+        'para': idDestinatario,
+        'visto': false
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Stream getMensages(String idDestinatario) {
+    try {
+       return _db
+        .child('mensajes')
+        .orderByChild('de')
+        .equalTo(_idUser)
+        .orderByChild('para')
+        .equalTo(idDestinatario)
+        .onValue;
+    } catch (e) {
+      print(e);
+      return null;
+    }   
+  }
+
+  Stream getAllUser() {
+    return _db.child('users').onValue;
+  }
 }
-
-
-
-
-// 185768934
-// I/flutter (13529): {res: false, mensaje: [firebase_auth/wrong-password] The password is invalid or the user does not have a password.}
-
-
