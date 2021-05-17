@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (BuildContext context) => AppState(),
       child: MaterialApp(
-        title: 'Smile Chat',
+        title: 'Smile',
         initialRoute: '/',
         theme: ThemeData(
             primarySwatch: Colors.lime,
