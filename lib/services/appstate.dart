@@ -49,7 +49,7 @@ class AppState with ChangeNotifier {
       result.user.updateProfile(displayName: nombre);
       if (result.user != null) {
         _db.child('users').push().set({
-          'name': nombre,
+          'name': nombre.toUpperCase(),
           'email': email,
           'idAuth': result.user.uid,
         });

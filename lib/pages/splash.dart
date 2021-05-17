@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smile/data/widgets.dart';
 import 'package:smile/services/appstate.dart';
 
 class SplashPage extends StatefulWidget {
@@ -78,36 +79,21 @@ class _SplashPageState extends State<SplashPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                'Ingresa y comienza a platicar con tus amigos',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Roboto',
-                                    fontSize: 18),
+                              Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Text(
+                                  'Ingresa y comienza a platicar con tus amigos',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Roboto',
+                                      fontSize: 18),
+                                ),
                               ),
                               SizedBox(height: 10),
                               TextFormField(
                                   controller: this._emailController,
-                                  decoration: InputDecoration(
-                                      errorStyle:
-                                          TextStyle(color: Colors.white),
-                                      contentPadding: EdgeInsets.symmetric(
-                                          vertical: 4, horizontal: 10),
-                                      labelStyle: TextStyle(color: Colors.grey),
-                                      labelText: 'Correo electrónico',
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(
-                                            width: 0, color: Colors.white),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(
-                                            width: 0, color: Colors.white),
-                                      ),
-                                      fillColor: Colors.white,
-                                      filled: true),
+                                  decoration: myInputDecoration('Correo electrónico', Colors.white),
                                   keyboardType: TextInputType.emailAddress,
                                   // ignore: missing_return
                                   validator: (String val) {
@@ -122,24 +108,7 @@ class _SplashPageState extends State<SplashPage> {
                               SizedBox(height: 10),
                               TextFormField(
                                 controller: this._passController,
-                                decoration: InputDecoration(
-                                    errorStyle: TextStyle(color: Colors.white),
-                                    contentPadding: EdgeInsets.symmetric(
-                                        vertical: 4, horizontal: 10),
-                                    labelStyle: TextStyle(color: Colors.grey),
-                                    labelText: 'Contraseña',
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(
-                                          width: 0, color: Colors.white),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(
-                                          width: 0, color: Colors.white),
-                                    ),
-                                    fillColor: Colors.white,
-                                    filled: true),
+                                decoration: myInputDecoration('Contraseña', Colors.white),
                                 keyboardType: TextInputType.text,
                                 obscureText: true,
                                 // ignore: missing_return

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smile/data/widgets.dart';
 import 'package:smile/services/appstate.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -9,12 +11,11 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   TextEditingController mensaje = new TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     final _state = Provider.of<AppState>(context, listen: true);
     final argumentos = ModalRoute.of(context).settings.arguments as Map;
-    print(argumentos['id']);
+    // print(argumentos['id']);
     return Scaffold(
         appBar: AppBar(title: Text(argumentos['nombre'])),
         body: Column(
@@ -25,7 +26,14 @@ class _ChatPageState extends State<ChatPage> {
                 builder:
                     (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                   if (snapshot.data == null)
-                    return Center(child: Text('No tienes mensajes'));
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(FontAwesomeIcons.solidFrown, color: Colors.grey, size: 45),
+                        SizedBox(height: 20),
+                        Text('Aún no tienes mensajes', style: TextStyle(color:Colors.grey),),
+                      ],
+                    );
 
                   Map<String, dynamic> _mensajes = snapshot.data;
                   List msn = new List();
@@ -58,20 +66,29 @@ class _ChatPageState extends State<ChatPage> {
                 },
               ),
             ),
-            Row(
-              children: [
-                Flexible(child: TextField(controller: mensaje)),
-                IconButton(
-                  onPressed: () {
-                    if (mensaje.text.isNotEmpty) {
-                      _state.nuevoMensaje(mensaje.text, argumentos['id']);
-                      mensaje.clear();
-                    }
-                    print(mensaje.text);
-                  },
-                  icon: Icon(Icons.send),
-                ),
-              ],
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              color: Colors.grey[300],
+              child: Row(
+                children: [
+                  Flexible(
+                    child: TextField(
+                      controller: mensaje,
+                      decoration: myInputDecoration(
+                          'Escribe un nuevo mensaje', Colors.white),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      if (mensaje.text.isNotEmpty) {
+                        _state.nuevoMensaje(mensaje.text, argumentos['id']);
+                        mensaje.clear();
+                      }
+                    },
+                    icon: Icon(Icons.send),
+                  ),
+                ],
+              ),
             ),
           ],
         ));
