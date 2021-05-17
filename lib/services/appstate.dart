@@ -46,7 +46,9 @@ class AppState with ChangeNotifier {
       print(email);
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: pass);
+
       result.user.updateProfile(displayName: nombre);
+
       if (result.user != null) {
         _db.child('users').push().set({
           'name': nombre.toUpperCase(),
@@ -65,36 +67,103 @@ class AppState with ChangeNotifier {
     }
   }
 
-  Future<void> nuevoMensaje(String mensaje, String idDestinatario) async {
+  Future<void> nuevoMensaje(
+      String mensaje, String idDestinatario, String nombredestino) async {
     try {
-      await _db.child('mensajes').push().set({
-        'mensaje': mensaje,
-        'fecha': DateTime.now().toString(),
-        'de': this._idUser,
-        'para': idDestinatario,
-        'visto': false
-      });
+
+      String _keyGrupo;
+      Map res = (await _db.child('grupo-mensajes').once()).value;
+      if (res == null) {
+        _keyGrupo = await _crearGrupo(mensaje, idDestinatario,
+            this._idUser, this._user.displayName, nombredestino);
+        await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser);
+      }else{
+          res.forEach((index, data){
+            List _users = data['users'];
+            if( _users.contains( this._idUser) &&  _users.contains(idDestinatario ))
+              _keyGrupo = index;
+          });
+           await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser);
+      }
+
     } catch (e) {
       print(e);
     }
   }
 
+  agregarMensajeAlGrupo(String keyGrupo, String mensaje, String idDestinatario,
+      String idUser) async {
+    await _db
+        .child('grupo-mensajes')
+        .child(keyGrupo)
+        .child('mensajes')
+        .push()
+        .set({
+      'mensaje': mensaje,
+      'fecha': DateTime.now().millisecondsSinceEpoch,
+      'hora': "${DateTime.now().hour}:${DateTime.now().minute}",
+      'remite': this._idUser,
+      'destino': idDestinatario,
+      'visto': false
+    }).then((data) async {
+       await _db
+        .child('grupo-mensajes')
+        .child(keyGrupo).update({
+          'fecha': DateTime.now().millisecondsSinceEpoch,
+        });
+    });
+  }
+
+  Future<String> _crearGrupo(String mensaje, String idDestinatario,
+      String idUser, String displayName, String nombredestino) async {
+    DatabaseReference referencia = _db.child('grupo-mensajes').push();
+    await _db.child('grupo-mensajes').child(referencia.key).set({
+      'fecha': DateTime.now().millisecondsSinceEpoch,
+      'users': [idDestinatario, idUser],
+      'names': [displayName, nombredestino]
+    });
+
+    return referencia.key;
+  }
+
   Stream getMensages(String idDestinatario) {
     try {
-       return _db
-        .child('mensajes')
-        .orderByChild('de')
-        .equalTo(_idUser)
-        .orderByChild('para')
-        .equalTo(idDestinatario)
-        .onValue;
+      return _db
+          .child('mensajes')
+          .orderByChild('de')
+          .equalTo(_idUser)
+          .orderByChild('para')
+          .equalTo(idDestinatario)
+          .onValue;
     } catch (e) {
       print(e);
       return null;
-    }   
+    }
   }
 
   Stream getAllUser() {
     return _db.child('users').onValue;
+  }
+
+  Future<Map> getDataUserByEmail(String email) async {
+    try {
+      DataSnapshot res =
+          await _db.child('users').orderByChild('email').equalTo(email).once();
+      Map info;
+      res.value.forEach((index, data) {
+        info = data;
+      });
+      return info;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Stream getGroupMensages(String keyGrupo, String idDestinatario) {
+    if(keyGrupo != null)
+    return _db.child('grupo-mensajes').child(keyGrupo).onValue;
+    else
+    return  _db.child('grupo-mensajes').onValue;
+
   }
 }

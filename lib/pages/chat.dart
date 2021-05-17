@@ -15,16 +15,15 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     final _state = Provider.of<AppState>(context, listen: true);
     final argumentos = ModalRoute.of(context).settings.arguments as Map;
-    // print(argumentos['id']);
+    print(argumentos);
     return Scaffold(
         appBar: AppBar(title: Text(argumentos['nombre'])),
         body: Column(
           children: [
             Expanded(
               child: StreamBuilder(
-                stream: _state.getMensages(argumentos['id']),
-                builder:
-                    (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                stream: _state.getGroupMensages(argumentos['keyGrupo'], argumentos['id']),
+                builder:(BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                   if (snapshot.data == null)
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -35,7 +34,8 @@ class _ChatPageState extends State<ChatPage> {
                       ],
                     );
 
-                  Map<String, dynamic> _mensajes = snapshot.data;
+                  Map<dynamic, dynamic> _mensajes = snapshot.data.snapshot.value;
+                  print(snapshot.data.snapshot.value);
                   List msn = new List();
                   _mensajes.forEach((index, dato) {
                     msn.add(dato);
@@ -81,7 +81,7 @@ class _ChatPageState extends State<ChatPage> {
                   IconButton(
                     onPressed: () {
                       if (mensaje.text.isNotEmpty) {
-                        _state.nuevoMensaje(mensaje.text, argumentos['id']);
+                        _state.nuevoMensaje(mensaje.text, argumentos['id'], argumentos['nombre']);
                         mensaje.clear();
                       }
                     },
