@@ -34,149 +34,159 @@ class _SplashPageState extends State<SplashPage> {
               bott > 0
                   ? SizedBox()
                   : Container(
-                      height: size.height * 0.45,
-                      padding:
-                          EdgeInsets.symmetric(vertical: 50),
-                      child: Image.asset('assets/images/logo1.png')),
+                      // height: size.height * 0.45,
+                      padding: EdgeInsets.only(
+                        top: size.height * 0.15,
+                      ),
+                      child: Image.asset(
+                        'assets/images/logo1.png',
+                        height: size.height * 0.25,
+                      ),
+                    ),
               this.mostrarFormulario == false
-                  ? Dismissible(
-                      key: Key('login'),
-                      direction: DismissDirection.up,
-                      onDismissed: (DismissDirection dir) {
-                        this.mostrarFormulario = true;
-                        setState(() {});
-                      },
-                      child: Container(
-                        margin: EdgeInsets.symmetric(vertical: 20),
-                        child: Column(
-                          children: [
-                            RotationTransition(
-                              turns: new AlwaysStoppedAnimation(-90 / 360),
-                              child: Icon(
-                                Icons.arrow_forward_ios,
-                                color: Colors.white,
-                                size: 30,
+                  ? Expanded(
+                      child: Dismissible(
+                        background: Container(color: Colors.lightGreen),
+                        key: Key('login'),
+                        direction: DismissDirection.up,
+                        onDismissed: (DismissDirection dir) {
+                          this.mostrarFormulario = true;
+                          setState(() {});
+                        },
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              RotationTransition(
+                                turns: new AlwaysStoppedAnimation(-90 / 360),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
                               ),
-                            ),
-                            Text(
-                              'ENTRAR',
-                              style: TextStyle(
-                                fontFamily: 'DMSansBold',
-                                color: Colors.white,
-                                fontSize: 20,
+                              Text(
+                                'ENTRAR',
+                                style: TextStyle(
+                                  fontFamily: 'DMSansBold',
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     )
                   : Expanded(
-                      child: Container(
-                        margin:
-                            EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                        child: Form(
-                          key: _formKey,
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Text(
-                                    'Ingresa y comienza a platicar con tus amigos',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontSize: 18),
+                      child: Center(
+                        child: Container(
+                          margin:
+                              EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                          child: Form(
+                            key: _formKey,
+                            child: SingleChildScrollView(
+                              child: Column(                                                                
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Text(
+                                      'Ingresa y comienza a platicar con tus amigos',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: 'Roboto',
+                                          fontSize: 18),
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 10),
-                                TextFormField(
-                                    controller: this._emailController,
+                                  SizedBox(height: 10),
+                                  TextFormField(
+                                      controller: this._emailController,
+                                      decoration: myInputDecoration(
+                                          'Correo electrónico', Colors.white),
+                                      keyboardType: TextInputType.emailAddress,
+                                      // ignore: missing_return
+                                      validator: (String val) {
+                                        if (val.isEmpty)
+                                          return 'Este campo es necesario';
+                                        if (RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                                .hasMatch(val) !=
+                                            true) {
+                                          return "Ingresa un correo electónico valido";
+                                        }
+                                      }),
+                                  SizedBox(height: 10),
+                                  TextFormField(
+                                    controller: this._passController,
                                     decoration: myInputDecoration(
-                                        'Correo electrónico', Colors.white),
-                                    keyboardType: TextInputType.emailAddress,
+                                        'Contraseña', Colors.white),
+                                    keyboardType: TextInputType.text,
+                                    obscureText: true,
                                     // ignore: missing_return
                                     validator: (String val) {
                                       if (val.isEmpty)
                                         return 'Este campo es necesario';
-                                      if (RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                              .hasMatch(val) !=
-                                          true) {
-                                        return "Ingresa un correo electónico valido";
+                                      if (val.length < 6)
+                                        return 'La contraseña es muy corta';
+                                    },
+                                  ),
+                                  InkWell(
+                                    onTap: () async {
+                                      if (_formKey.currentState.validate()) {
+                                        Map<String, dynamic> _res =
+                                            await Provider.of<AppState>(context,
+                                                    listen: false)
+                                                .log_in(_emailController.text,
+                                                    _passController.text);
+                                        print(_res);
+                                        if (_res['res'])
+                                          Navigator.pop(context);
+                                        else
+                                          _scaKey.currentState
+                                              .showSnackBar(SnackBar(
+                                            content:
+                                                Text(_res['mensaje'].toString()),
+                                            backgroundColor: Colors.red,
+                                            duration: Duration(seconds: 7),
+                                          ));
                                       }
-                                    }),
-                                SizedBox(height: 10),
-                                TextFormField(
-                                  controller: this._passController,
-                                  decoration: myInputDecoration(
-                                      'Contraseña', Colors.white),
-                                  keyboardType: TextInputType.text,
-                                  obscureText: true,
-                                  // ignore: missing_return
-                                  validator: (String val) {
-                                    if (val.isEmpty)
-                                      return 'Este campo es necesario';
-                                    if (val.length < 6)
-                                      return 'La contraseña es muy corta';
-                                  },
-                                ),
-                                InkWell(
-                                  onTap: () async {
-                                    if (_formKey.currentState.validate()) {
-                                      Map<String, dynamic> _res =
-                                          await Provider.of<AppState>(context,
-                                                  listen: false)
-                                              .log_in(_emailController.text,
-                                                  _passController.text);
-                                      print(_res);
-                                      if (_res['res'])
-                                        Navigator.pop(context);
-                                      else
-                                        _scaKey.currentState
-                                            .showSnackBar(SnackBar(
-                                          content:
-                                              Text(_res['mensaje'].toString()),
-                                          backgroundColor: Colors.red,
-                                          duration: Duration(seconds: 7),
-                                        ));
-                                    }
-                                  },
-                                  splashColor: Colors.limeAccent,
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(vertical: 10),
-                                    margin: EdgeInsets.symmetric(
-                                        horizontal: 40, vertical: 20),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black54,
-                                            blurRadius: 5.0,
-                                            offset: Offset(0.0, 0.75)),
-                                      ],
-                                      color: Colors.white,
-                                    ),
-                                    width: double.infinity,
-                                    child: Center(
-                                      child: Text('Entrar',
-                                          style: TextStyle(
-                                              fontFamily: 'DMSansBold',
-                                              color: Color(0xFFA0D523),
-                                              fontSize: 15)),
+                                    },
+                                    splashColor: Colors.limeAccent,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(vertical: 10),
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: 40, vertical: 20),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.black54,
+                                              blurRadius: 5.0,
+                                              offset: Offset(0.0, 0.75)),
+                                        ],
+                                        color: Colors.white,
+                                      ),
+                                      width: double.infinity,
+                                      child: Center(
+                                        child: Text('Entrar',
+                                            style: TextStyle(
+                                                fontFamily: 'DMSansBold',
+                                                color: Color(0xFFA0D523),
+                                                fontSize: 15)),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                InkWell(
-                                  onTap: () =>
-                                      Navigator.pushNamed(context, 'registro'),
-                                  child: Text(
-                                    'Registrate aqui',
-                                    style: TextStyle(color: Colors.white),
+                                  InkWell(
+                                    onTap: () =>
+                                        Navigator.pushNamed(context, 'registro'),
+                                    child: Text(
+                                      'Registrate aqui',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

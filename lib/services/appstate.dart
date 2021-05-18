@@ -3,14 +3,15 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class AppState with ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference _db = new FirebaseDatabase().reference();
-  User _user;
-  String _idUser = '';
-
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _login = false;
+  String _idUser = '';
+  User _user;
+
   get login => this._login;
   get idUser => this._idUser;
+  get isUser => this._user;
 
   Future<Map<String, dynamic>> log_in(String email, String pass) async {
     try {
@@ -67,25 +68,27 @@ class AppState with ChangeNotifier {
     }
   }
 
+  // METODOS PARA AGREGAR UN NUEVO MENSAJE
+
   Future<void> nuevoMensaje(
       String mensaje, String idDestinatario, String nombredestino) async {
     try {
-
       String _keyGrupo;
       Map res = (await _db.child('grupo-mensajes').once()).value;
       if (res == null) {
-        _keyGrupo = await _crearGrupo(mensaje, idDestinatario,
-            this._idUser, this._user.displayName, nombredestino);
-        await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser);
-      }else{
-          res.forEach((index, data){
-            List _users = data['users'];
-            if( _users.contains( this._idUser) &&  _users.contains(idDestinatario ))
-              _keyGrupo = index;
-          });
-           await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser);
+        _keyGrupo = await _crearGrupo(mensaje, idDestinatario, this._idUser,
+            this._user.displayName, nombredestino);
+        await agregarMensajeAlGrupo(
+            _keyGrupo, mensaje, idDestinatario, this._idUser);
+      } else {
+        res.forEach((index, data) {
+          List _users = data['users'];
+          if (_users.contains(this._idUser) && _users.contains(idDestinatario))
+            _keyGrupo = index;
+        });
+        await agregarMensajeAlGrupo(
+            _keyGrupo, mensaje, idDestinatario, this._idUser);
       }
-
     } catch (e) {
       print(e);
     }
@@ -106,11 +109,9 @@ class AppState with ChangeNotifier {
       'destino': idDestinatario,
       'visto': false
     }).then((data) async {
-       await _db
-        .child('grupo-mensajes')
-        .child(keyGrupo).update({
-          'fecha': DateTime.now().millisecondsSinceEpoch,
-        });
+      await _db.child('grupo-mensajes').child(keyGrupo).update({
+        'fecha': DateTime.now().millisecondsSinceEpoch,
+      });
     });
   }
 
@@ -126,23 +127,21 @@ class AppState with ChangeNotifier {
     return referencia.key;
   }
 
-  Stream getMensages(String idDestinatario) {
+// METODO PARA OBTENER LAS CONVERSACIONES
+  // Stream getAllUser() {
+  //   try {
+  //     return _db.child('users').onValue;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
+
+  Stream getAllGrupos() {
     try {
-      return _db
-          .child('mensajes')
-          .orderByChild('de')
-          .equalTo(_idUser)
-          .orderByChild('para')
-          .equalTo(idDestinatario)
-          .onValue;
+      return _db.child('grupo-mensajes').onValue;
     } catch (e) {
-      print(e);
       return null;
     }
-  }
-
-  Stream getAllUser() {
-    return _db.child('users').onValue;
   }
 
   Future<Map> getDataUserByEmail(String email) async {
@@ -159,11 +158,10 @@ class AppState with ChangeNotifier {
     }
   }
 
-  Stream getGroupMensages(String keyGrupo, String idDestinatario) {
-    if(keyGrupo != null)
-    return _db.child('grupo-mensajes').child(keyGrupo).onValue;
+  Stream getGroupMensages(String keyGrupo) {
+    if (keyGrupo != null)
+      return _db.child('grupo-mensajes').child(keyGrupo).onValue;
     else
-    return  _db.child('grupo-mensajes').onValue;
-
+      return _db.child('grupo-mensajes').onValue;
   }
 }

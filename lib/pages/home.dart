@@ -4,11 +4,17 @@ import 'package:smile/data/colors.dart';
 import 'package:smile/data/widgets.dart';
 import 'package:smile/services/appstate.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  TextEditingController correoController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final _state = Provider.of<AppState>(context, listen: false);
-    TextEditingController correoController = new TextEditingController();
     // Size size = MediaQuery.of(context).size;
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -45,7 +51,8 @@ class HomePage extends StatelessWidget {
                       InkWell(
                         onTap: () async {
                           if (correoController.text.isNotEmpty) {
-                            Map _res = await _state.getDataUserByEmail(correoController.text);
+                            Map _res = await _state
+                                .getDataUserByEmail(correoController.text);
                             print(_res);
                             if (_res != null) {
                               correoController.clear();
@@ -53,7 +60,7 @@ class HomePage extends StatelessWidget {
                               Navigator.pushNamed(context, 'chat', arguments: {
                                 'id': _res['idAuth'],
                                 'nombre': _res['name'],
-                                'keyGrupo': null,                                
+                                'keyGrupo': null,
                               });
                             }
                           }
@@ -102,6 +109,10 @@ class HomePage extends StatelessWidget {
                 height: 100,
               ),
             ),
+             ListTile(
+              title: Text( _state.isUser.displayName ),
+              leading: Icon(Icons.person),
+            ),
             ListTile(
               title: Text('Cerrar sesión'),
               leading: Icon(Icons.exit_to_app),
@@ -112,55 +123,93 @@ class HomePage extends StatelessWidget {
       ),
       appBar: AppBar(backgroundColor: Color(0xFFA0D523)),
       body: StreamBuilder(
-        stream: _state.getAllUser(),
+        stream: _state.getAllGrupos(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          // print(snapshot.data.snapshot.value);
-          Map<dynamic, dynamic> _users = snapshot.data.snapshot.value;
-          List us = new List();
-          _users.forEach((index, dato) {
-            us.add({"key": index, ...dato});
-          });
-          return ListView(
-            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-            children: [
-              for (var item in us)
-                if (item['idAuth'] != _state.idUser)
-                  Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: ListTile(
-                      tileColor: Colors.grey[200],
-                      title: Text(
-                        item['name'],
-                        overflow: TextOverflow.fade,
-                        maxLines: 1,
-                      ),
-                      subtitle: Text('Hola, Buenos días!'),
-                      leading: CircleAvatar(
-                        backgroundColor: primario,
-                        child: Text(
-                          item['name'].substring(0, 2),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text('2:00 p.m.',
-                              style: TextStyle(color: Colors.grey)),
-                          Icon(Icons.circle_notifications, color: primario)
-                        ],
-                      ),
-                      onTap: () => Navigator.pushNamed(context, 'chat',
-                          arguments: {
-                            'id': item['idAuth'],
-                            'nombre': item['name'],
-                            'keyGrupo':null,
-                          }),
-                    ),
-                  ),
-            ],
-          );
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return Center(
+                  child:
+                      CircularProgressIndicator(backgroundColor: Colors.green));
+              break;
+            case ConnectionState.none:
+              return Text('algo salió mal');
+              break;
+            case ConnectionState.active:
+              Map<dynamic, dynamic> _grupoMensajes =
+                  snapshot.data.snapshot.value;
+              if (_grupoMensajes == null) return Text('No tienes mensajes');
+
+              List _conversaciones = new List();
+
+              _grupoMensajes.forEach((index, data) {
+                if (data['users'].contains(_state.idUser))
+                  _conversaciones.add({'key': index, ...data});
+              });
+              _conversaciones.sort((a, b) => b['fecha'].compareTo(a['fecha']));
+
+              return ListView(
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                children: [
+                  for (var item in _conversaciones) newMethod(item, context),
+                ],
+              );
+              break;
+            default:
+              return Text('algo salió mal');
+          }
         },
+      ),
+    );
+  }
+
+  Widget newMethod(Map item, BuildContext context) {
+    final _state = Provider.of<AppState>(context, listen: true);
+
+    List _names = new List.from(item['names']);
+    _names.remove(_state.isUser.displayName);
+
+    List _ids = new List.from(item['users']);
+    _ids.remove(_state.idUser);
+
+    List _mensajes = new List();
+
+    item['mensajes'].forEach((index, data) {
+      _mensajes.add(data);
+    });
+
+    _mensajes.sort((a, b) => b['fecha'].compareTo(a['fecha']));
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        tileColor: Colors.grey[200],
+        title: Text(
+          _names[0],
+          overflow: TextOverflow.fade,
+          maxLines: 1,
+        ),
+        subtitle: Text(_mensajes[0]['mensaje']),
+        leading: CircleAvatar(
+          backgroundColor: primario,
+          child: Text(
+            _names[0].substring(0, 2).toUpperCase(),
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(_mensajes[0]['hora'], style: TextStyle(color: Colors.grey)),
+            (!_mensajes[0]['visto'] && _mensajes[0]['remite'] != _state.idUser)
+                ? Icon(Icons.circle_notifications, color: primario)
+                : SizedBox(),
+          ],
+        ),
+        onTap: () => Navigator.pushNamed(context, 'chat', arguments: {
+          'id': _ids[0],
+          'nombre': _names[0],
+          'keyGrupo': item['key'],
+        }),
       ),
     );
   }
