@@ -128,13 +128,6 @@ class AppState with ChangeNotifier {
   }
 
 // METODO PARA OBTENER LAS CONVERSACIONES
-  // Stream getAllUser() {
-  //   try {
-  //     return _db.child('users').onValue;
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
 
   Stream getAllGrupos() {
     try {

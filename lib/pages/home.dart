@@ -99,10 +99,11 @@ class _HomePageState extends State<HomePage> {
         },
       ),
       drawer: Drawer(
-        child: ListView(
+        child: Column(
           children: [
             Container(
-              padding: EdgeInsets.symmetric(vertical: 20),
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 50),
               color: primario,
               child: Image.asset(
                 'assets/images/logo2.png',
@@ -118,6 +119,12 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.exit_to_app),
               onTap: () => _state.logout(),
             ),
+            Expanded(child: SizedBox()),
+            Container(
+              width: double.infinity,
+              color: Colors.grey[200],
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Text('    '),)
           ],
         ),
       ),
@@ -188,7 +195,9 @@ class _HomePageState extends State<HomePage> {
           overflow: TextOverflow.fade,
           maxLines: 1,
         ),
-        subtitle: Text(_mensajes[0]['mensaje']),
+        subtitle: Text(_mensajes[0]['mensaje'], maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         leading: CircleAvatar(
           backgroundColor: primario,
           child: Text(

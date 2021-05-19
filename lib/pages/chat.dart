@@ -40,11 +40,12 @@ class _ChatPageState extends State<ChatPage> {
 
                   if (argumentos['keyGrupo'] == null) {
                     // trae todas las conversaciones
-                      snapshot.data.snapshot.value.forEach((index, data) {
-                        if (data['users'].contains(_state.idUser) &&  data['users'].contains(argumentos['id']  ) )
-                          data['mensajes'].forEach((i, data) => _mensajes.add(  data ) );                       
-                      });
-
+                    snapshot.data.snapshot.value.forEach((index, data) {
+                      if (data['users'].contains(_state.idUser) &&
+                          data['users'].contains(argumentos['id']))
+                        data['mensajes']
+                            .forEach((i, data) => _mensajes.add(data));
+                    });
                   } else {
                     snapshot.data.snapshot.value['mensajes']
                         .forEach((index, data) {
@@ -54,13 +55,13 @@ class _ChatPageState extends State<ChatPage> {
 
                   _mensajes.sort((a, b) => b['fecha'].compareTo(a['fecha']));
 
-                  if(_mensajes.isEmpty) return Text('no tienes mensajes');
+                  if (_mensajes.isEmpty) return Text('no tienes mensajes');
 
                   return ListView(
                     controller: _miControlador,
                     reverse: true,
                     physics: BouncingScrollPhysics(),
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
                     children: [
                       for (var item in _mensajes)
                         Align(
@@ -68,30 +69,15 @@ class _ChatPageState extends State<ChatPage> {
                               ? Alignment.centerLeft
                               : Alignment.centerRight,
                           child: Container(
-                            width: size.width * 0.5,
-                            // constraints: BoxConstraints(
-                            //     maxWidth: size.width * 0.8,
-                            //     minWidth: size.width * 0.4),
-                            decoration: BoxDecoration(
-                              borderRadius: item['remite'] != _state.idUser
-                                  ? BorderRadius.only(
-                                      // topLeft: Radius.circular(20),
-                                      topRight: Radius.circular(20),
-                                      bottomRight: Radius.circular(20),
-                                      bottomLeft: Radius.circular(20),
-                                    )
-                                  : BorderRadius.only(
-                                      topLeft: Radius.circular(20),
-                                      topRight: Radius.circular(20),
-                                      bottomLeft: Radius.circular(20),
-                                    ),
-                              color: item['remite'] == _state.idUser
-                                  ? Colors.grey[200]
-                                  : primario,
+                            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                            margin: EdgeInsets.symmetric(vertical: 2),
+                            constraints: BoxConstraints(
+                              maxWidth: size.width * 0.7,
+                              minWidth: size.width * 0.3,
                             ),
-                            padding: EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 10),
-                            margin: EdgeInsets.symmetric(vertical: 5),
+                            decoration: item['remite'] != _state.idUser
+                                ? _youBoxDecoration()
+                                : _meBoxDecoration(),
                             child: Text(item['mensaje']),
                           ),
                         ),
@@ -119,7 +105,7 @@ class _ChatPageState extends State<ChatPage> {
                             argumentos['nombre']);
                         mensaje.clear();
                         _miControlador.animateTo(
-                            _miControlador.position.minScrollExtent - 100.0,
+                            _miControlador.position.minScrollExtent,
                             duration: Duration(milliseconds: 500),
                             curve: Curves.fastOutSlowIn);
                       }
@@ -131,6 +117,28 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ],
         ));
+  }
+
+  BoxDecoration _youBoxDecoration() {
+    return BoxDecoration(
+      color: primario,
+      borderRadius: BorderRadius.only(
+        topRight: Radius.circular(10),
+        bottomRight: Radius.circular(10),
+        bottomLeft: Radius.circular(10),
+      ),
+    );
+  }
+
+  BoxDecoration _meBoxDecoration() {
+    return BoxDecoration(
+      color: Colors.grey[300],
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(10),
+        topRight: Radius.circular(10),
+        bottomLeft: Radius.circular(10),
+      ),
+    );
   }
 
   Column _sinMensajes() {

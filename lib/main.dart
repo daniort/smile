@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
               iconTheme: IconThemeData(color: Colors.white),
               actionsIconTheme: IconThemeData(color: Colors.white),
               color: Color(0xFFA0D523),
-              elevation: 0.0,
+              // elevation: 1.0,
               textTheme: TextTheme(
                 headline6: TextStyle(color: Colors.white, fontSize: 20),
               ),
