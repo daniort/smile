@@ -124,11 +124,11 @@ class _HomePageState extends State<HomePage> {
               width: double.infinity,
               color: Colors.grey[200],
               padding: EdgeInsets.symmetric(vertical: 20),
-              child: Text('    '),)
+              child: Text(''),)
           ],
         ),
       ),
-      appBar: AppBar(backgroundColor: Color(0xFFA0D523)),
+      appBar: AppBar(title: Text('Mis conversaciones'),backgroundColor: Color(0xFFA0D523)),
       body: StreamBuilder(
         stream: _state.getAllGrupos(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -189,7 +189,9 @@ class _HomePageState extends State<HomePage> {
     return Container(
       margin: EdgeInsets.only(bottom: 10),
       child: ListTile(
-        tileColor: Colors.grey[200],
+        tileColor: (!_mensajes[0]['visto'] && _mensajes[0]['remite'] != _state.idUser)
+         ? Colors.grey[200]
+         : Colors.grey[100],
         title: Text(
           _names[0],
           overflow: TextOverflow.fade,

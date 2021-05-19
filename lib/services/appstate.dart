@@ -157,4 +157,13 @@ class AppState with ChangeNotifier {
     else
       return _db.child('grupo-mensajes').onValue;
   }
+
+  void cambiarVisto(keyGrupo, keyMensaje) {
+    _db
+        .child('grupo-mensajes')
+        .child(keyGrupo)
+        .child('mensajes')
+        .child(keyMensaje)
+        .update({'visto': true});
+  }
 }

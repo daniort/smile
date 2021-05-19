@@ -14,13 +14,7 @@ class _ChatPageState extends State<ChatPage> {
   TextEditingController mensaje = new TextEditingController();
   ScrollController _miControlador = new ScrollController();
 
-  @override
-  void initState() {
-    super.initState();
-    // _miControlador.animateTo(_miControlador.position.maxScrollExtent,
-    //     duration: Duration(milliseconds: 500), curve: Curves.fastOutSlowIn);
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     final _state = Provider.of<AppState>(context, listen: true);
@@ -39,7 +33,6 @@ class _ChatPageState extends State<ChatPage> {
                   List _mensajes = new List();
 
                   if (argumentos['keyGrupo'] == null) {
-                    // trae todas las conversaciones
                     snapshot.data.snapshot.value.forEach((index, data) {
                       if (data['users'].contains(_state.idUser) &&
                           data['users'].contains(argumentos['id']))
@@ -49,13 +42,16 @@ class _ChatPageState extends State<ChatPage> {
                   } else {
                     snapshot.data.snapshot.value['mensajes']
                         .forEach((index, data) {
-                      _mensajes.add(data);
+                      _mensajes.add({'key':index, ...data});
                     });
                   }
 
                   _mensajes.sort((a, b) => b['fecha'].compareTo(a['fecha']));
 
                   if (_mensajes.isEmpty) return Text('no tienes mensajes');
+                  print(_mensajes[0]);
+                  if( !_mensajes[0]['visto'] &&  _mensajes[0]['destino'] == _state.idUser )
+                    _state.cambiarVisto(argumentos['keyGrupo'], _mensajes[0]['key']);
 
                   return ListView(
                     controller: _miControlador,
