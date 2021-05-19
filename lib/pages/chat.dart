@@ -37,25 +37,26 @@ class _ChatPageState extends State<ChatPage> {
                 builder: (context, snapshot) {
                   if (snapshot.data == null) return _sinMensajes();
                   List _mensajes = new List();
+                  String _keyGrupo = argumentos['keyGrupo'];
 
                   if (argumentos['keyGrupo'] == null) {
-                    // trae todas las conversaciones
                     snapshot.data.snapshot.value.forEach((index, data) {
-                      if (data['users'].contains(_state.idUser) &&
-                          data['users'].contains(argumentos['id']))
-                        data['mensajes']
-                            .forEach((i, data) => _mensajes.add(data));
+                      if (data['users'].contains(_state.idUser) &&data['users'].contains(argumentos['id'])){
+                        _keyGrupo = index;
+                        data['mensajes'].forEach((index, data) =>_mensajes.add({'key': index, ...data}));
+                      }
                     });
                   } else {
                     snapshot.data.snapshot.value['mensajes']
                         .forEach((index, data) {
-                      _mensajes.add(data);
+                      _mensajes.add({'key': index, ...data});
                     });
                   }
 
                   _mensajes.sort((a, b) => b['fecha'].compareTo(a['fecha']));
-
                   if (_mensajes.isEmpty) return Text('no tienes mensajes');
+                  if (!_mensajes[0]['visto'] &&_mensajes[0]['destino'] == _state.idUser)
+                    _state.cambiaraVisto(_keyGrupo, _mensajes[0]['key']);
 
                   return ListView(
                     controller: _miControlador,
@@ -69,7 +70,8 @@ class _ChatPageState extends State<ChatPage> {
                               ? Alignment.centerLeft
                               : Alignment.centerRight,
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 10),
                             margin: EdgeInsets.symmetric(vertical: 2),
                             constraints: BoxConstraints(
                               maxWidth: size.width * 0.7,

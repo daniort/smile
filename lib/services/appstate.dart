@@ -157,4 +157,15 @@ class AppState with ChangeNotifier {
     else
       return _db.child('grupo-mensajes').onValue;
   }
+
+  Future<void> cambiaraVisto(String keyGrupo, String keyMensaje) async {
+    await _db
+        .child('grupo-mensajes')
+        .child(keyGrupo)
+        .child('mensajes')
+        .child(keyMensaje)
+        .update({
+          'visto': true
+        });
+  }
 }
