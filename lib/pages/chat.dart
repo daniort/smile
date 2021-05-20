@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+// import 'package:images_picker/images_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smile/data/colors.dart';
 import 'package:smile/data/widgets.dart';
 import 'package:smile/services/appstate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -13,8 +17,8 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   TextEditingController mensaje = new TextEditingController();
   ScrollController _miControlador = new ScrollController();
-
-  
+  File _image;
+  final ImagePicker picker = ImagePicker();
   @override
   Widget build(BuildContext context) {
     final _state = Provider.of<AppState>(context, listen: true);
@@ -22,7 +26,35 @@ class _ChatPageState extends State<ChatPage> {
     Size size = MediaQuery.of(context).size;
     print(argumentos);
     return Scaffold(
-        appBar: AppBar(title: Text(argumentos['nombre'])),
+        appBar: AppBar(
+          title: Text(argumentos['nombre']),
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  try {
+                    var select = await picker.getImage(source: ImageSource.camera);
+                    File _image = File(select.path);
+                      if( _image != null )
+                        // _metodo para subir archivos al storage
+                    // setState(() {});
+                  } catch (e) {
+                    print('Error: $e');
+                  }
+                },
+                icon: Icon(Icons.camera_alt)),
+                IconButton(
+                onPressed: () async {
+                  try {
+                    var select = await picker.getImage(source: ImageSource.gallery);
+                      _image = File(select.path);
+                    // setState(() {});
+                  } catch (e) {
+                    print('Error: $e');
+                  }
+                },
+                icon: Icon(Icons.image )),
+          ],
+        ),
         body: Column(
           children: [
             Expanded(
@@ -42,7 +74,7 @@ class _ChatPageState extends State<ChatPage> {
                   } else {
                     snapshot.data.snapshot.value['mensajes']
                         .forEach((index, data) {
-                      _mensajes.add({'key':index, ...data});
+                      _mensajes.add({'key': index, ...data});
                     });
                   }
 
@@ -50,8 +82,10 @@ class _ChatPageState extends State<ChatPage> {
 
                   if (_mensajes.isEmpty) return Text('no tienes mensajes');
                   print(_mensajes[0]);
-                  if( !_mensajes[0]['visto'] &&  _mensajes[0]['destino'] == _state.idUser )
-                    _state.cambiarVisto(argumentos['keyGrupo'], _mensajes[0]['key']);
+                  if (!_mensajes[0]['visto'] &&
+                      _mensajes[0]['destino'] == _state.idUser)
+                    _state.cambiarVisto(
+                        argumentos['keyGrupo'], _mensajes[0]['key']);
 
                   return ListView(
                     controller: _miControlador,
@@ -65,7 +99,8 @@ class _ChatPageState extends State<ChatPage> {
                               ? Alignment.centerLeft
                               : Alignment.centerRight,
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 10),
                             margin: EdgeInsets.symmetric(vertical: 2),
                             constraints: BoxConstraints(
                               maxWidth: size.width * 0.7,

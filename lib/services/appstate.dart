@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class AppState with ChangeNotifier {
   DatabaseReference _db = new FirebaseDatabase().reference();
+  Reference _storage = FirebaseStorage.instance.ref();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _login = false;
   String _idUser = '';
@@ -12,6 +16,17 @@ class AppState with ChangeNotifier {
   get login => this._login;
   get idUser => this._idUser;
   get isUser => this._user;
+
+  Future<String> subirfoto(File image) async {
+    String _name = 'file' + DateTime.now().millisecondsSinceEpoch.toString();
+    try {
+      UploadTask _uploadTask = _storage.child('files/name').putFile(image);
+      String _url = await _uploadTask.snapshot.ref.getDownloadURL();
+      return _url;
+    } catch (e) {
+      return null;
+    }
+  }
 
   Future<Map<String, dynamic>> log_in(String email, String pass) async {
     try {
