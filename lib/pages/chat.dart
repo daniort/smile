@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smile/data/colors.dart';
 import 'package:smile/data/widgets.dart';
 import 'package:smile/services/appstate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -13,6 +16,8 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   TextEditingController mensaje = new TextEditingController();
   ScrollController _miControlador = new ScrollController();
+  File _image;
+  final picker = ImagePicker();
 
   @override
   void initState() {
@@ -28,7 +33,61 @@ class _ChatPageState extends State<ChatPage> {
     Size size = MediaQuery.of(context).size;
     print(argumentos);
     return Scaffold(
-        appBar: AppBar(title: Text(argumentos['nombre'])),
+        appBar: AppBar(
+          title: Text(argumentos['nombre']),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.camera_alt),
+              onPressed: () async {
+                final pickedFile =
+                    await picker.getImage(source: ImageSource.camera);
+
+                if (pickedFile != null) {
+                  String _url =
+                      await _state.guardarImagen(File(pickedFile.path));
+                  if (_url != null) {
+                    _state.nuevoMensaje(
+                        _url, argumentos['id'], argumentos['nombre'], true);
+                  }
+                }
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.image),
+              onPressed: () async {
+                final pickedFile =
+                    await picker.getImage(source: ImageSource.gallery);
+
+                    // await picker.getVideo(source: ImageSource.camera );
+
+                if (pickedFile != null) {
+                  String _url =
+                      await _state.guardarImagen(File(pickedFile.path));
+                  if (_url != null) {
+                    _state.nuevoMensaje(
+                        _url, argumentos['id'], argumentos['nombre'], true);
+                  }
+                }
+              },
+            ),
+            //  IconButton(
+            //   icon: Icon(Icons.camera ),
+            //   onPressed: () async {
+            //     final pickedFile =
+            //         await picker.getVideo(source: ImageSource.camera );
+
+            //     if (pickedFile != null) {
+            //       String _url =
+            //           await _state.guardarImagen(File(pickedFile.path));
+            //       if (_url != null) {
+            //         _state.nuevoMensaje(
+            //             _url, argumentos['id'], argumentos['nombre'], true);
+            //       }
+            //     }
+            //   },
+            // ),
+          ],
+        ),
         body: Column(
           children: [
             Expanded(
@@ -41,9 +100,11 @@ class _ChatPageState extends State<ChatPage> {
 
                   if (argumentos['keyGrupo'] == null) {
                     snapshot.data.snapshot.value.forEach((index, data) {
-                      if (data['users'].contains(_state.idUser) &&data['users'].contains(argumentos['id'])){
+                      if (data['users'].contains(_state.idUser) &&
+                          data['users'].contains(argumentos['id'])) {
                         _keyGrupo = index;
-                        data['mensajes'].forEach((index, data) =>_mensajes.add({'key': index, ...data}));
+                        data['mensajes'].forEach((index, data) =>
+                            _mensajes.add({'key': index, ...data}));
                       }
                     });
                   } else {
@@ -55,7 +116,8 @@ class _ChatPageState extends State<ChatPage> {
 
                   _mensajes.sort((a, b) => b['fecha'].compareTo(a['fecha']));
                   if (_mensajes.isEmpty) return Text('no tienes mensajes');
-                  if (!_mensajes[0]['visto'] &&_mensajes[0]['destino'] == _state.idUser)
+                  if (!_mensajes[0]['visto'] &&
+                      _mensajes[0]['destino'] == _state.idUser)
                     _state.cambiaraVisto(_keyGrupo, _mensajes[0]['key']);
 
                   return ListView(
@@ -80,7 +142,11 @@ class _ChatPageState extends State<ChatPage> {
                             decoration: item['remite'] != _state.idUser
                                 ? _youBoxDecoration()
                                 : _meBoxDecoration(),
-                            child: Text(item['mensaje']),
+                            child: (item.containsKey('imagen') &&
+                                    item['imagen'] == true)
+                                ? Image.network(item['mensaje'], width: size.height * 0.25,)
+                                : Text(item['mensaje']),
+                            // Text('esto es una image')
                           ),
                         ),
                     ],
@@ -104,7 +170,7 @@ class _ChatPageState extends State<ChatPage> {
                     onPressed: () {
                       if (mensaje.text.isNotEmpty) {
                         _state.nuevoMensaje(mensaje.text, argumentos['id'],
-                            argumentos['nombre']);
+                            argumentos['nombre'], false);
                         mensaje.clear();
                         _miControlador.animateTo(
                             _miControlador.position.minScrollExtent,

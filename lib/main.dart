@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (BuildContext context) => AppState(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Smile',
         initialRoute: '/',
         theme: ThemeData(

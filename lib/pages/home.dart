@@ -18,14 +18,16 @@ class _HomePageState extends State<HomePage> {
     // Size size = MediaQuery.of(context).size;
     return Scaffold(
       floatingActionButton: myBotonFlotante(context, correoController),
-      drawer: myDrawer( context ),
+      drawer: myDrawer(context),
       appBar: AppBar(backgroundColor: primario),
       body: StreamBuilder(
         stream: _state.getAllGrupos(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
-              return Center(child:CircularProgressIndicator(backgroundColor: Colors.green));
+              return Center(
+                  child:
+                      CircularProgressIndicator(backgroundColor: Colors.green));
               break;
             case ConnectionState.none:
               return Text('algo salió mal');
@@ -46,7 +48,8 @@ class _HomePageState extends State<HomePage> {
               return ListView(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 children: [
-                  for (var item in _conversaciones) itemConversacion(item, context),
+                  for (var item in _conversaciones)
+                    itemConversacion(item, context),
                 ],
               );
               break;
@@ -57,8 +60,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  
 
   Widget itemConversacion(Map item, BuildContext context) {
     final _state = Provider.of<AppState>(context, listen: true);
@@ -80,17 +81,32 @@ class _HomePageState extends State<HomePage> {
     return Container(
       margin: EdgeInsets.only(bottom: 10),
       child: ListTile(
-        tileColor:  (!_mensajes[0]['visto'] && _mensajes[0]['remite'] != _state.idUser) 
-            ? Colors.grey[200]
-            :Colors.grey[100],
+        tileColor:
+            (!_mensajes[0]['visto'] && _mensajes[0]['remite'] != _state.idUser)
+                ? Colors.grey[200]
+                : Colors.grey[100],
         title: Text(
-          _names[0],
+          _names[0].toUpperCase(),
           overflow: TextOverflow.fade,
           maxLines: 1,
         ),
-        subtitle: Text(_mensajes[0]['mensaje'], maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+
+
+        subtitle: (_mensajes[0].containsKey('imagen') && _mensajes[0]['imagen'] == true)
+            ? Row(
+              children: [
+                Icon(Icons.image, color: Colors.grey[400]),
+                Text('Foto'),
+              ],
+            )
+            : Text(
+                _mensajes[0]['mensaje'],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+
+
         leading: CircleAvatar(
           backgroundColor: primario,
           child: Text(

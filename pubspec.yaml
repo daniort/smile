@@ -9,13 +9,21 @@ dependencies:
   flutter:
     sdk: flutter
 
+  
+
   cupertino_icons: ^1.0.0
-  provider: ^4.3.3
+  cached_network_image: ^2.5.0
+  image_picker: ^0.6.7+22
   firebase_auth: ^0.20.1
   firebase_database: ^6.0.0  
   firebase_core: ^0.7.0 
   firebase_analytics: ^5.0.2
+  firebase_storage: ^7.0.0
   font_awesome_flutter: ^8.11.0
+  provider: ^4.3.3
+  video_player: ^1.0.1
+  
+  
 
 dev_dependencies:
   flutter_test:

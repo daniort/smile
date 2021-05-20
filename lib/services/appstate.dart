@@ -1,9 +1,15 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class AppState with ChangeNotifier {
   DatabaseReference _db = new FirebaseDatabase().reference();
+
+  Reference _storage = FirebaseStorage.instance.ref();
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _login = false;
   String _idUser = '';
@@ -12,6 +18,21 @@ class AppState with ChangeNotifier {
   get login => this._login;
   get idUser => this._idUser;
   get isUser => this._user;
+
+  Future<String> guardarImagen(File file) async {
+    String _name = 'file' + DateTime.now().millisecondsSinceEpoch.toString();
+    try {
+    
+      UploadTask _tarea = _storage.child('files/$_name').putFile(file);
+      String _url;
+      await _tarea.then((val) async{
+        _url = await val.ref.getDownloadURL();
+      });
+      return _url;
+    } catch (e) {
+      return null;
+    }
+  }
 
   Future<Map<String, dynamic>> log_in(String email, String pass) async {
     try {
@@ -71,7 +92,7 @@ class AppState with ChangeNotifier {
   // METODOS PARA AGREGAR UN NUEVO MENSAJE
 
   Future<void> nuevoMensaje(
-      String mensaje, String idDestinatario, String nombredestino) async {
+      String mensaje, String idDestinatario, String nombredestino, bool imagen) async {
     try {
       String _keyGrupo;
       Map res = (await _db.child('grupo-mensajes').once()).value;
@@ -79,7 +100,7 @@ class AppState with ChangeNotifier {
         _keyGrupo = await _crearGrupo(mensaje, idDestinatario, this._idUser,
             this._user.displayName, nombredestino);
         await agregarMensajeAlGrupo(
-            _keyGrupo, mensaje, idDestinatario, this._idUser);
+            _keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
       } else {
         res.forEach((index, data) {
           List _users = data['users'];
@@ -87,7 +108,7 @@ class AppState with ChangeNotifier {
             _keyGrupo = index;
         });
         await agregarMensajeAlGrupo(
-            _keyGrupo, mensaje, idDestinatario, this._idUser);
+            _keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
       }
     } catch (e) {
       print(e);
@@ -95,7 +116,7 @@ class AppState with ChangeNotifier {
   }
 
   agregarMensajeAlGrupo(String keyGrupo, String mensaje, String idDestinatario,
-      String idUser) async {
+      String idUser, bool imagen) async {
     await _db
         .child('grupo-mensajes')
         .child(keyGrupo)
@@ -107,7 +128,8 @@ class AppState with ChangeNotifier {
       'hora': "${DateTime.now().hour}:${DateTime.now().minute}",
       'remite': this._idUser,
       'destino': idDestinatario,
-      'visto': false
+      'visto': false,
+      'imagen': imagen
     }).then((data) async {
       await _db.child('grupo-mensajes').child(keyGrupo).update({
         'fecha': DateTime.now().millisecondsSinceEpoch,
@@ -164,8 +186,6 @@ class AppState with ChangeNotifier {
         .child(keyGrupo)
         .child('mensajes')
         .child(keyMensaje)
-        .update({
-          'visto': true
-        });
+        .update({'visto': true});
   }
 }
