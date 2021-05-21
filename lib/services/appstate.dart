@@ -91,26 +91,26 @@ class AppState with ChangeNotifier {
   // METODOS PARA AGREGAR UN NUEVO MENSAJE
 
   Future<void> nuevoMensaje(String keyGrupo, String mensaje,
-      String idDestinatario, String nombredestino, bool imagen) async {
+      String idDestinatario, String nombredestino, bool imagen, bool video) async {
     try {
       String _keyGrupo = keyGrupo;
       if (_keyGrupo != null)
-        await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+        await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen, video);
       else {
         Map res = (await _db.child('grupo-mensajes').once()).value;
         if (res == null) {
           _keyGrupo = await _crearGrupo(mensaje, idDestinatario, this._idUser, this._user.displayName, nombredestino);
-          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen, video);
         } else {
           res.forEach((index, data) {
             List _users = data['users'];
             if (_users.contains(this._idUser) && _users.contains(idDestinatario)) _keyGrupo = index;
           });
           if(_keyGrupo != null)
-          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen, video);
           else{
              _keyGrupo = await _crearGrupo(mensaje, idDestinatario, this._idUser, this._user.displayName, nombredestino);
-          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen, video);
           }
         }
       }
@@ -120,7 +120,7 @@ class AppState with ChangeNotifier {
   }
 
   agregarMensajeAlGrupo(String keyGrupo, String mensaje, String idDestinatario,
-      String idUser, bool imagen) async {
+      String idUser, bool imagen, bool video) async {
     await _db
         .child('grupo-mensajes')
         .child(keyGrupo)
@@ -133,7 +133,8 @@ class AppState with ChangeNotifier {
       'remite': this._idUser,
       'destino': idDestinatario,
       'visto': false,
-      'imagen': imagen
+      if( imagen ) 'imagen': imagen,
+      if( video ) 'video': video,
     }).then((data) async {
       await _db.child('grupo-mensajes').child(keyGrupo).update({
         'fecha': DateTime.now().millisecondsSinceEpoch,

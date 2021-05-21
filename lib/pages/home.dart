@@ -19,7 +19,8 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       floatingActionButton: myBotonFlotante(context, correoController),
       drawer: myDrawer(context),
-      appBar: AppBar(backgroundColor: primario, title: Text('Mis conversaciones')),
+      appBar:
+          AppBar(backgroundColor: primario, title: Text('Mis conversaciones')),
       body: StreamBuilder(
         stream: _state.getAllGrupos(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -90,23 +91,27 @@ class _HomePageState extends State<HomePage> {
           overflow: TextOverflow.fade,
           maxLines: 1,
         ),
-
-
-        subtitle: (_mensajes[0].containsKey('imagen') && _mensajes[0]['imagen'] == true)
+        subtitle: (_mensajes[0].containsKey('imagen') &&
+                _mensajes[0]['imagen'] == true)
             ? Row(
-              children: [
-                Icon(Icons.image, color: Colors.grey[400]),
-                Text('Foto'),
-              ],
-            )
-            : Text(
-                _mensajes[0]['mensaje'],
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-
-
+                children: [
+                  Icon(Icons.image, color: Colors.grey[400]),
+                  Text('Foto'),
+                ],
+              )
+            : (_mensajes[0].containsKey('video') &&
+                    _mensajes[0]['video'] == true)
+                ? Row(
+                    children: [
+                      Icon(Icons.camera, color: Colors.grey[400]),
+                      Text('Video'),
+                    ],
+                  )
+                : Text(
+                    _mensajes[0]['mensaje'],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
         leading: CircleAvatar(
           backgroundColor: primario,
           child: Text(

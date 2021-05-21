@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smile/data/colors.dart';
 import 'package:smile/data/widgets.dart';
+import 'package:smile/pages/mivideo.dart';
 import 'package:smile/services/appstate.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:image_picker/image_picker.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:video_player/video_player.dart';
+import 'package:video_player/video_player.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -16,14 +21,11 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   TextEditingController mensaje = new TextEditingController();
   ScrollController _miControlador = new ScrollController();
-  File _image;
   final picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // _miControlador.animateTo(_miControlador.position.maxScrollExtent,
-    //     duration: Duration(milliseconds: 500), curve: Curves.fastOutSlowIn);
   }
 
   @override
@@ -36,55 +38,85 @@ class _ChatPageState extends State<ChatPage> {
         appBar: AppBar(
           title: Text(argumentos['nombre']),
           actions: [
-            IconButton(
-              icon: Icon(Icons.camera_alt),
-              onPressed: () async {
-                final pickedFile =
-                    await picker.getImage(source: ImageSource.camera);
+            PopupMenuButton(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(Icons.menu),
+              ),
+              // color: Colors.yellow,
+              onSelected: (String value) async {
+                switch (value) {
+                  case 'a':
+                    final pickedFile =
+                        await picker.getImage(source: ImageSource.gallery);
+                    if (pickedFile != null) {
+                      String _url =
+                          await _state.guardarImagen(File(pickedFile.path));
+                      if (_url != null) {
+                        _state.nuevoMensaje(
+                            argumentos['keyGrupo'],
+                            _url,
+                            argumentos['id'],
+                            argumentos['nombre'],
+                            true,
+                            false);
+                      }
+                    }
+                    break;
+                  case 'b':
+                    final pickedFile =
+                        await picker.getImage(source: ImageSource.camera);
 
-                if (pickedFile != null) {
-                  String _url =
-                      await _state.guardarImagen(File(pickedFile.path));
-                  if (_url != null) {
-                    _state.nuevoMensaje(argumentos['keyGrupo'],_url, argumentos['id'], argumentos['nombre'], true);
-                  }
+                    if (pickedFile != null) {
+                      String _url =
+                          await _state.guardarImagen(File(pickedFile.path));
+                      if (_url != null) {
+                        _state.nuevoMensaje(
+                            argumentos['keyGrupo'],
+                            _url,
+                            argumentos['id'],
+                            argumentos['nombre'],
+                            true,
+                            false);
+                      }
+                    }
+
+                    break;
+                  case 'c':
+                    final pickedFile =
+                        await picker.getVideo(source: ImageSource.camera);
+                    if (pickedFile != null) {
+                      String _url =
+                          await _state.guardarImagen(File(pickedFile.path));
+                      if (_url != null) {
+                        _state.nuevoMensaje(
+                            argumentos['keyGrupo'],
+                            _url,
+                            argumentos['id'],
+                            argumentos['nombre'],
+                            false,
+                            true);
+                      }
+                    }
+                    break;
+                  default:
                 }
               },
-            ),
-            IconButton(
-              icon: Icon(Icons.image),
-              onPressed: () async {
-                final pickedFile =
-                    await picker.getImage(source: ImageSource.gallery);
-
-                    // await picker.getVideo(source: ImageSource.camera );
-
-                if (pickedFile != null) {
-                  String _url =
-                      await _state.guardarImagen(File(pickedFile.path));
-                  if (_url != null) {
-                    _state.nuevoMensaje(argumentos['keyGrupo'],
-                        _url, argumentos['id'], argumentos['nombre'], true);
-                  }
-                }
+              itemBuilder: (BuildContext context) {
+                return [
+                  PopupMenuItem<String>(
+                      value: 'a',
+                      child: Row(
+                        children: [
+                          Icon(Icons.image, color: Colors.green),
+                          Text('Elegir Foto'),
+                        ],
+                      )),
+                  PopupMenuItem<String>(value: 'b', child: Text('Tomar Foto')),
+                  PopupMenuItem<String>(value: 'c', child: Text('Tomar Video')),
+                ];
               },
             ),
-            //  IconButton(
-            //   icon: Icon(Icons.camera ),
-            //   onPressed: () async {
-            //     final pickedFile =
-            //         await picker.getVideo(source: ImageSource.camera );
-
-            //     if (pickedFile != null) {
-            //       String _url =
-            //           await _state.guardarImagen(File(pickedFile.path));
-            //       if (_url != null) {
-            //         _state.nuevoMensaje(
-            //             _url, argumentos['id'], argumentos['nombre'], true);
-            //       }
-            //     }
-            //   },
-            // ),
           ],
         ),
         body: Column(
@@ -126,28 +158,7 @@ class _ChatPageState extends State<ChatPage> {
                     padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
                     children: [
                       for (var item in _mensajes)
-                        Align(
-                          alignment: item['remite'] != _state.idUser
-                              ? Alignment.centerLeft
-                              : Alignment.centerRight,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 10),
-                            margin: EdgeInsets.symmetric(vertical: 2),
-                            constraints: BoxConstraints(
-                              maxWidth: size.width * 0.7,
-                              minWidth: size.width * 0.3,
-                            ),
-                            decoration: item['remite'] != _state.idUser
-                                ? _youBoxDecoration()
-                                : _meBoxDecoration(),
-                            child: (item.containsKey('imagen') &&
-                                    item['imagen'] == true)
-                                ? Image.network(item['mensaje'], width: size.height * 0.25,)
-                                : Text(item['mensaje']),
-                            // Text('esto es una image')
-                          ),
-                        ),
+                        _itemMensaje(item, context, size),
                     ],
                   );
                 },
@@ -168,8 +179,13 @@ class _ChatPageState extends State<ChatPage> {
                   IconButton(
                     onPressed: () {
                       if (mensaje.text.isNotEmpty) {
-                        _state.nuevoMensaje(argumentos['keyGrupo'],mensaje.text, argumentos['id'],
-                            argumentos['nombre'], false);
+                        _state.nuevoMensaje(
+                            argumentos['keyGrupo'],
+                            mensaje.text,
+                            argumentos['id'],
+                            argumentos['nombre'],
+                            false,
+                            false);
                         mensaje.clear();
                         _miControlador.animateTo(
                             _miControlador.position.minScrollExtent,
@@ -220,5 +236,94 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ],
     );
+  }
+
+  Widget _itemMensaje(Map item, BuildContext context, Size size) {
+    final _state = Provider.of<AppState>(context, listen: true);
+    return Align(
+      alignment: item['remite'] != _state.idUser
+          ? Alignment.centerLeft
+          : Alignment.centerRight,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        margin: EdgeInsets.symmetric(vertical: 2),
+        constraints: BoxConstraints(
+          maxWidth: size.width * 0.7,
+          minWidth: size.width * 0.3,
+        ),
+        decoration: item['remite'] != _state.idUser
+            ? _youBoxDecoration()
+            : _meBoxDecoration(),
+        child: (item.containsKey('imagen') && item['imagen'] == true)
+            ? CachedNetworkImage(
+                imageUrl: item['mensaje'],
+                placeholder: (context, url) => Center(
+                    child: CircularProgressIndicator(
+                  backgroundColor: Colors.grey[700],
+                )),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+                width: size.height * 0.25,
+              )
+            : (item.containsKey('video') && item['video'] == true)
+                // ? mivideo(item['mensaje'])
+                ? MiVidePlayer(url: item['mensaje'])
+                : Text(item['mensaje']),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    mensaje.dispose();
+    _miControlador.dispose();
+    super.dispose();
+  }
+
+  Widget mivideo(String url) {
+    VideoPlayerController _controller = VideoPlayerController.network(url);
+    Future<void> _initializeVideoPlayerFuture;
+    _initializeVideoPlayerFuture = _controller.initialize();
+
+    return FutureBuilder(
+        future: _initializeVideoPlayerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    icon: Icon(
+                      _controller.value.isPlaying
+                          ? Icons.pause
+                          : Icons.play_arrow,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    onPressed: ()  {
+                      if (_controller.value.isPlaying) {
+                        print('HOLA');
+                         _controller.pause();
+                        // setState(() {});
+                      } else {
+                        print('HOLA2');
+                         _controller.play();
+                        // setState(() {});
+                      }
+                    },
+                  ),
+                ),
+              ],
+            );
+          } else
+            return Center(
+                child: CircularProgressIndicator(
+              backgroundColor: Colors.grey[600],
+            ));
+        });
   }
 }
