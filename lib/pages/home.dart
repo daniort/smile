@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       floatingActionButton: myBotonFlotante(context, correoController),
       drawer: myDrawer(context),
-      appBar: AppBar(backgroundColor: primario),
+      appBar: AppBar(backgroundColor: primario, title: Text('Mis conversaciones')),
       body: StreamBuilder(
         stream: _state.getAllGrupos(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {

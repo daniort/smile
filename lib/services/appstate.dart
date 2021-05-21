@@ -22,10 +22,9 @@ class AppState with ChangeNotifier {
   Future<String> guardarImagen(File file) async {
     String _name = 'file' + DateTime.now().millisecondsSinceEpoch.toString();
     try {
-    
       UploadTask _tarea = _storage.child('files/$_name').putFile(file);
       String _url;
-      await _tarea.then((val) async{
+      await _tarea.then((val) async {
         _url = await val.ref.getDownloadURL();
       });
       return _url;
@@ -91,24 +90,29 @@ class AppState with ChangeNotifier {
 
   // METODOS PARA AGREGAR UN NUEVO MENSAJE
 
-  Future<void> nuevoMensaje(
-      String mensaje, String idDestinatario, String nombredestino, bool imagen) async {
+  Future<void> nuevoMensaje(String keyGrupo, String mensaje,
+      String idDestinatario, String nombredestino, bool imagen) async {
     try {
-      String _keyGrupo;
-      Map res = (await _db.child('grupo-mensajes').once()).value;
-      if (res == null) {
-        _keyGrupo = await _crearGrupo(mensaje, idDestinatario, this._idUser,
-            this._user.displayName, nombredestino);
-        await agregarMensajeAlGrupo(
-            _keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
-      } else {
-        res.forEach((index, data) {
-          List _users = data['users'];
-          if (_users.contains(this._idUser) && _users.contains(idDestinatario))
-            _keyGrupo = index;
-        });
-        await agregarMensajeAlGrupo(
-            _keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+      String _keyGrupo = keyGrupo;
+      if (_keyGrupo != null)
+        await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+      else {
+        Map res = (await _db.child('grupo-mensajes').once()).value;
+        if (res == null) {
+          _keyGrupo = await _crearGrupo(mensaje, idDestinatario, this._idUser, this._user.displayName, nombredestino);
+          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+        } else {
+          res.forEach((index, data) {
+            List _users = data['users'];
+            if (_users.contains(this._idUser) && _users.contains(idDestinatario)) _keyGrupo = index;
+          });
+          if(_keyGrupo != null)
+          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+          else{
+             _keyGrupo = await _crearGrupo(mensaje, idDestinatario, this._idUser, this._user.displayName, nombredestino);
+          await agregarMensajeAlGrupo(_keyGrupo, mensaje, idDestinatario, this._idUser, imagen);
+          }
+        }
       }
     } catch (e) {
       print(e);

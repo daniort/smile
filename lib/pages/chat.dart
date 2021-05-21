@@ -46,8 +46,7 @@ class _ChatPageState extends State<ChatPage> {
                   String _url =
                       await _state.guardarImagen(File(pickedFile.path));
                   if (_url != null) {
-                    _state.nuevoMensaje(
-                        _url, argumentos['id'], argumentos['nombre'], true);
+                    _state.nuevoMensaje(argumentos['keyGrupo'],_url, argumentos['id'], argumentos['nombre'], true);
                   }
                 }
               },
@@ -64,7 +63,7 @@ class _ChatPageState extends State<ChatPage> {
                   String _url =
                       await _state.guardarImagen(File(pickedFile.path));
                   if (_url != null) {
-                    _state.nuevoMensaje(
+                    _state.nuevoMensaje(argumentos['keyGrupo'],
                         _url, argumentos['id'], argumentos['nombre'], true);
                   }
                 }
@@ -169,7 +168,7 @@ class _ChatPageState extends State<ChatPage> {
                   IconButton(
                     onPressed: () {
                       if (mensaje.text.isNotEmpty) {
-                        _state.nuevoMensaje(mensaje.text, argumentos['id'],
+                        _state.nuevoMensaje(argumentos['keyGrupo'],mensaje.text, argumentos['id'],
                             argumentos['nombre'], false);
                         mensaje.clear();
                         _miControlador.animateTo(
